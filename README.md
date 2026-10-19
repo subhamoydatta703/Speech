@@ -1,58 +1,141 @@
-# Speech — desktop dictation project
+# Speech
 
-Status: the backend has been migrated to a lightweight account API for offline desktop STT. The desktop app, installer, frontend and live integrations remain pending. Start with the [offline product plan](docs/OFFLINE_PRODUCT_PLAN.md), [backend checklist](docs/BACKEND_CHANGE_PLAN.md) and [backend setup](backend/README.md).
+**Give your thoughts a voice.** — Local-first desktop dictation powered by [Whisper](https://github.com/ggml-org/whisper.cpp). Speak naturally and Speech types for you, completely offline after setup.
 
-Build an installable voice-to-text assistant inspired by the category of products such as Willow Voice. Users sign in on the website, download/install the desktop software, and complete automatic authenticated setup without another normal login prompt. A local model enables dictation into the active application using a global keyboard shortcut. After setup, transcription works offline.
+## Overview
 
-The website supports the desktop product through browser sign-in, downloads, installation instructions, and help. The installed app performs recording, displays an animated recording overlay, and inserts text.
+Speech is a voice-to-text desktop application for Windows. Users sign in on the website, download the installer, and activate with a one-time browser confirmation. After the speech model is downloaded, all transcription runs locally — no cloud, no data leaves your machine.
 
-## Confirmed direction
+| Component | Stack | Purpose |
+| --- | --- | --- |
+| **Frontend** | Next.js · TypeScript · Clerk | Marketing site, sign-in, download page, installation confirmation |
+| **Backend** | Bun · Express · Prisma · Neon PostgreSQL | Account API, Clerk verification, authenticated installer delivery |
+| **Desktop** | Electron · React · whisper.cpp | Recording overlay, global shortcut, local STT, text insertion |
 
-- Separate `frontend/` and `backend/` folders.
-- Next.js with TypeScript for the website; a separate TypeScript service for the backend.
-- Clerk authentication. “Clark” in the initial brief is interpreted as Clerk.
-- Speech-to-text (STT), also called automatic speech recognition (ASR). Text-to-speech playback is outside the current scope.
-- Installation through a website download and a copyable terminal command.
-- Global shortcut, microphone recording, visual feedback, and transcription into other apps.
-- Download a public ungated model directly onto the user computer; local inference requires no Hugging Face token. No cloud transcription in the MVP. Noise suppression is deferred.
-- Frontend design will use the user-selected [Modern, Clean SaaS Company Figma template](https://www.figma.com/site/2595Gwlxqa5M9I3YWNaD4x/Modern--Clean-SaaS-Company--Community-?node-id=0-1). See the design requirements for adaptation scope and inspection status.
+## Quick start
 
-## Proposed starting point
+### Prerequisites
 
-Desktop proposal: Windows 11 x64 with Electron + React + TypeScript. Implemented backend: Bun, Express, Prisma ORM 7 with PrismaPg, Neon PostgreSQL storing only user ID/email, and no hosted inference dependencies. Clerk JWTs supply identity and email without a user API lookup. No webhooks, device records, audio history, or transcript history. External services still need live configuration and validation.
+- [Bun](https://bun.sh) ≥ 1.3.14
+- [Node.js](https://nodejs.org) ≥ 24 (for Electron)
+- A [Clerk](https://clerk.com) project with publishable + secret keys
+- A [Neon](https://neon.tech) PostgreSQL database
 
-## Documents
+### Install dependencies
+
+```bash
+bun install
+```
+
+### Backend
+
+```bash
+cp backend/.env.example backend/.env
+# Fill in DATABASE_URL, CLERK keys, and optionally WINDOWS_INSTALLER_PATH
+cd backend
+bun run db:generate
+bun run db:migrate
+bun run dev            # → http://localhost:4000
+```
+
+### Frontend
+
+```bash
+cp frontend/.env.example frontend/.env
+# Fill in CLERK keys and BACKEND_URL
+cd frontend
+bun run dev            # → http://localhost:3000
+```
+
+### Desktop (development)
+
+```bash
+cd desktop
+bun run dev            # builds and launches the Electron app
+```
+
+### Build the Windows installer
+
+```bash
+bun run package:windows   # outputs desktop/release/Speech-Setup.exe
+```
+
+## Repository layout
+
+```
+frontend/              Next.js website — sign-in, download, account, help
+backend/               Express API — Clerk auth, user accounts, installer delivery
+desktop/               Electron app — overlay, recording, local Whisper inference
+packages/contracts/    Shared schemas and types (no server secrets)
+docs/                  Requirements, plans, architecture decisions
+```
+
+## How the download works
+
+The installer is served through an authenticated flow:
+
+1. User signs in on the website via Clerk
+2. Clicks **Download installer ↓** on `/download`
+3. Frontend calls `HEAD /api/download` to check availability
+4. Backend verifies the Clerk JWT and streams the installer
+
+**Development:** `WINDOWS_INSTALLER_PATH` points to a local file (e.g. `../desktop/release/Speech-Setup.exe`).
+
+**Production:** `WINDOWS_INSTALLER_PATH` can be a URL (e.g. a GitHub Release asset). The backend streams it to the user so the download appears to come from your domain.
+
+## Deployment
+
+### Frontend → Vercel
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | `frontend` |
+| Build Command | `next build` |
+| Environment | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `BACKEND_URL` |
+
+### Backend → Render
+
+| Setting | Value |
+| --- | --- |
+| Build Command | `bun install --frozen-lockfile && bun run --cwd backend build` |
+| Start Command | `bun run --cwd backend start` |
+| Environment | `HOST=0.0.0.0`, `DATABASE_URL`, `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CORS_ORIGINS`, `WINDOWS_INSTALLER_PATH` |
+
+> **Important:** `CORS_ORIGINS` must include your Vercel frontend URL. `WINDOWS_INSTALLER_PATH` can be a GitHub Releases URL for production.
+
+### Installer hosting
+
+Upload `Speech-Setup.exe` to a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github) and set `WINDOWS_INSTALLER_PATH` to the download URL:
+
+```
+https://github.com/subhamoydatta703/Speech/releases/download/v0.1.0/Speech-Setup.exe
+```
+
+## How it works
+
+1. **Download & install** — User downloads `Speech-Setup.exe` from the website after signing in.
+2. **Activate** — The installer generates a confirmation code. The user matches it in their browser to link the installation to their account.
+3. **Model download** — On first launch, the app downloads the Whisper base model (~148 MB) from Hugging Face. This is a one-time step.
+4. **Dictate** — Press the global shortcut to start recording. Speech transcribes locally using whisper.cpp and types the result into the active application.
+
+## Privacy
+
+- All transcription happens **locally** on your machine.
+- No audio or text is sent to any server after activation.
+- The backend only stores user ID and email for account management.
+- The speech model is downloaded directly from Hugging Face (public, no token required).
+
+## Documentation
 
 | Document | Purpose |
 | --- | --- |
-| [Offline product plan](docs/OFFLINE_PRODUCT_PLAN.md) | Current scope, desktop flow, phases and acceptance gates |
-| [Backend changes](docs/BACKEND_CHANGE_PLAN.md) | Current-code migration checklist and endpoint changes |
-| [Frontend plan](docs/FRONTEND_IMPLEMENTATION_PLAN.md) | Public downloads, desktop sign-in, account UI and implementation checklist |
-| [Product requirements](docs/PRODUCT_REQUIREMENTS.md) | Scope, user journeys, acceptance criteria |
-| [Architecture](docs/ARCHITECTURE.md) | Folder boundaries, runtime design, deployment |
-| [Design requirements](docs/DESIGN_REQUIREMENTS.md) | Website, desktop overlay, interaction states, Figma handoff |
-| [STT pipeline](docs/STT_PIPELINE.md) | Audio handling, model options, evaluation |
-| [Authentication and API](docs/AUTH_AND_API.md) | Clerk browser/desktop sign-in, current account API contracts |
-| [Installation and releases](docs/INSTALLATION_AND_RELEASES.md) | Installer, terminal commands, updates, uninstall |
-| [Security and data](docs/SECURITY_AND_DATA.md) | Permissions, credentials, retention, trust boundaries |
-| [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Ordered phases with completion gates |
-| [Backlog and decisions](docs/BACKLOG_AND_DECISIONS.md) | Pending tasks, assumptions, questions, risks |
-| [Validation and sources](docs/VALIDATION_AND_SOURCES.md) | Test matrix, proposed targets, official references |
+| [Offline product plan](docs/OFFLINE_PRODUCT_PLAN.md) | Scope, desktop flow, phases and acceptance gates |
+| [Backend changes](docs/BACKEND_CHANGE_PLAN.md) | Migration checklist and endpoint changes |
+| [Frontend plan](docs/FRONTEND_IMPLEMENTATION_PLAN.md) | Downloads, desktop sign-in, account UI |
+| [Authenticated distribution](docs/AUTHENTICATED_DISTRIBUTION.md) | Sign-in-once install flow |
+| [Windows desktop](docs/WINDOWS_DESKTOP_IMPLEMENTATION.md) | Electron app architecture |
+| [Installation API](docs/INSTALLATION_AUTH_API.md) | Installation activation endpoints |
 
-Start with the offline product plan and backend change checklist. Earlier documents are historical where they conflict with these plans. Track unresolved choices in the backlog. All dates, limits, commands, API paths, and performance budgets in these documents are proposed unless explicitly described as confirmed.
+## License
 
-## Planned repository layout
-
-```text
-frontend/             # Next.js website, Clerk UI, account/download pages
-backend/              # Independent TypeScript account API and Clerk verification
-desktop/              # Electron app, overlay, OS integration, local inference
-packages/contracts/   # Shared schemas and types, no server secrets
-packages/stt/         # Runtime-neutral STT interfaces and text normalization
-installer/            # PowerShell bootstrap and packaging configuration
-docs/                 # Requirements, plans, decisions
-```
-
-The backend and shared contracts now exist. The remaining application folders are planned. Follow backend/README.md for installation, configuration, tests and startup; the offline product plan and backend change checklist govern future implementation. The backend setup guide describes the migrated account API; desktop authentication compatibility remains pending.
-
-Latest installation flow: [Sign in once and install](docs/AUTHENTICATED_DISTRIBUTION.md). The authenticated backend download endpoint exists; automatic installer/app session handoff remains to be built.
+Private — an [AgEX](https://agex.dev) product.
