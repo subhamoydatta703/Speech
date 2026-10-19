@@ -98,12 +98,96 @@ function showMain() {
   main.focus();
   publish();
 }
+let releasePoller: ReturnType<typeof setInterval> | undefined;
+
+/** Parse an Electron accelerator into virtual key codes for GetAsyncKeyState polling. */
+function shortcutKeyCodes(shortcut: string): number[] {
+  const map: Record<string, number> = {
+    control: 0x11, ctrl: 0x11,
+    shift: 0x10,
+    alt: 0x12,
+    meta: 0x5b, super: 0x5b, command: 0x5b,
+    space: 0x20, tab: 0x09, escape: 0x1b, enter: 0x0d,
+    backspace: 0x08, delete: 0x2e,
+    up: 0x26, down: 0x28, left: 0x25, right: 0x27,
+    f1: 0x70, f2: 0x71, f3: 0x72, f4: 0x73, f5: 0x74, f6: 0x75,
+    f7: 0x76, f8: 0x77, f9: 0x78, f10: 0x79, f11: 0x7a, f12: 0x7b,
+  };
+  return shortcut
+    .split("+")
+    .map((k) => {
+      const lower = k.trim().toLowerCase();
+      if (map[lower] !== undefined) return map[lower];
+      // Single character → its ASCII code (uppercase)
+      if (lower.length === 1) return lower.toUpperCase().charCodeAt(0);
+      return 0;
+    })
+    .filter((c) => c > 0);
+}
+
+/** Start polling key state — when ALL keys in the shortcut are released, stop recording. */
+function startReleasePolling() {
+  stopReleasePolling();
+  const codes = shortcutKeyCodes(state.shortcut);
+  if (codes.length === 0) return;
+
+  // Build a tiny PowerShell snippet that outputs "1" while all keys are held, "0" when released.
+  // We run a one-shot PowerShell to poll every 50 ms in the native process for lower latency.
+  const { spawn: spawnProc } = require("node:child_process") as typeof import("node:child_process");
+  const ps = spawnProc(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      `
+Add-Type -MemberDefinition '[DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vKey);' -Name U -Namespace W
+while ($true) {
+  Start-Sleep -Milliseconds 50
+  $held = $true
+  foreach ($k in @(${codes.join(",")})) {
+    if (([W.U]::GetAsyncKeyState($k) -band 0x8000) -eq 0) { $held = $false; break }
+  }
+  if (-not $held) { Write-Output "RELEASED"; exit 0 }
+}
+`,
+    ],
+    { windowsHide: true, stdio: "pipe" },
+  );
+  const rl = require("node:readline") as typeof import("node:readline");
+  rl.createInterface({ input: ps.stdout }).on("line", (line: string) => {
+    if (line.trim() === "RELEASED" && state.phase === "recording") {
+      stopReleasePolling();
+      // Trigger stop recording (same as pressing shortcut again)
+      stopping = true;
+      main.webContents.send("speech:capture", "stop");
+    }
+  });
+  ps.stderr.on("data", () => {});
+  ps.on("exit", () => { releasePoller = undefined; });
+  // Store a handle so we can kill it if needed
+  releasePoller = setInterval(() => {}, 86400000) as any; // keep-alive — actual cleanup via ps.kill()
+  (releasePoller as any).__ps = ps;
+}
+
+function stopReleasePolling() {
+  if (releasePoller) {
+    const ps = (releasePoller as any).__ps;
+    if (ps && !ps.killed) ps.kill();
+    clearInterval(releasePoller);
+    releasePoller = undefined;
+  }
+}
+
 function cancelRecording() {
   generation++;
   inferenceJob?.abort();
   inferenceJob = undefined;
   stopping = false;
   target = undefined;
+  stopReleasePolling();
   main.webContents.send("speech:capture", "cancel");
   update({ phase: "idle", message: "Recording cancelled." });
   overlay.hide();
@@ -126,6 +210,7 @@ async function toggleRecording() {
     return;
   if (state.phase === "recording") {
     stopping = true;
+    stopReleasePolling();
     main.webContents.send("speech:capture", "stop");
     return;
   }
@@ -147,10 +232,12 @@ async function toggleRecording() {
   update({
     phase: "recording",
     message:
-      "Listening… Press your shortcut again to finish. Limit: 60 seconds.",
+      "Listening… Hold your shortcut — release to finish. Limit: 60 seconds.",
   });
   displayOverlay();
   main.webContents.send("speech:capture", "start");
+  // Start monitoring for key release
+  startReleasePolling();
 }
 async function runTranscription(samples: unknown, rate: unknown) {
   if (
@@ -349,6 +436,7 @@ else {
         show: false,
         backgroundColor: "#fbfaf7",
         title: "Speech — An AgEX product",
+        icon: resource("icon.ico"),
         autoHideMenuBar: true,
         webPreferences: settings,
       });
@@ -430,9 +518,7 @@ else {
         await saveShortcut(value);
         update({ message: "Shortcut updated." });
       });
-      const image = nativeImage.createFromDataURL(
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAFUlEQVQ4T2NkmGvzn4ECwESJ5lEDRg0YBAAAaQwCbXEtcwoAAAAASUVORK5CYII=",
-      );
+      const image = nativeImage.createFromPath(resource("icon.ico"));
       tray = new Tray(image);
       tray.setToolTip("Speech — An AgEX product");
       tray.setContextMenu(
@@ -480,6 +566,7 @@ else {
     activationJob?.abort();
     modelJob?.abort();
     inferenceJob?.abort();
+    stopReleasePolling();
     globalShortcut.unregisterAll();
     input?.dispose();
   });

@@ -4,78 +4,112 @@
     Arial,
     sans-serif;
   color: #25392e;
+  line-height: 1.5;
+  font-size: 13px;
+}
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
   background: #fbfaf7;
-  line-height: 1.6;
-  font-size: 14px;
 }
 * {
   box-sizing: border-box;
 }
-body {
-  margin: 0;
-}
+
 main {
   max-width: 720px;
   margin: auto;
-  padding: 28px 32px;
+  padding: 16px 28px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 header span,
 .small,
 footer {
-  font-size: 12px;
+  font-size: 11px;
   color: #667167;
 }
 .logo {
-  font-size: 30px;
+  font-size: 24px;
   letter-spacing: -1.5px;
 }
 .eyebrow {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 1.6px;
 }
+.intro {
+  flex-shrink: 0;
+}
 h1 {
-  font-size: 38px;
+  font-size: 26px;
   line-height: 1.15;
-  letter-spacing: -1.7px;
+  letter-spacing: -1.2px;
   font-weight: 500;
-  margin: 15px 0;
+  margin: 6px 0;
+}
+.intro p {
+  margin: 0 0 6px;
 }
 h2 {
-  font-size: 17px;
+  font-size: 14px;
   font-weight: 600;
   margin: 0;
 }
 h3 {
-  font-size: 15px;
+  font-size: 13px;
+  margin: 6px 0;
 }
 p {
   color: #667167;
+  margin: 4px 0;
+}
+.sections {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #ccd4c8 transparent;
+}
+.sections::-webkit-scrollbar {
+  width: 4px;
+}
+.sections::-webkit-scrollbar-thumb {
+  background: #ccd4c8;
+  border-radius: 4px;
 }
 section {
   background: white;
   border: 1px solid #dce0d7;
-  padding: 22px;
-  border-radius: 14px;
-  margin: 18px 0;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+section p {
+  font-size: 12px;
+  line-height: 1.5;
 }
 .section-title {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .badge {
-  font-size: 10px;
+  font-size: 9px;
   white-space: nowrap;
   background: #efeee7;
   border-radius: 20px;
-  padding: 4px 10px;
+  padding: 3px 9px;
 }
 .badge.ready {
   background: #e2edcc;
@@ -85,9 +119,10 @@ button {
   background: #25392e;
   color: white;
   border: 1px solid #25392e;
-  border-radius: 7px;
-  padding: 10px 15px;
+  border-radius: 6px;
+  padding: 7px 13px;
   cursor: pointer;
+  font-size: 12px;
 }
 button:disabled {
   opacity: 0.45;
@@ -100,7 +135,7 @@ button.secondary {
 }
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 button:focus-visible,
@@ -111,15 +146,15 @@ select:focus-visible {
 }
 label {
   display: block;
-  font-size: 12px;
-  margin: 14px 0;
+  font-size: 11px;
+  margin: 8px 0;
 }
 input,
 select {
   display: block;
   width: 100%;
-  margin-top: 7px;
-  padding: 10px;
+  margin-top: 4px;
+  padding: 7px 10px;
   border: 1px solid #ccd4c8;
   border-radius: 6px;
   font: inherit;
@@ -128,55 +163,61 @@ select {
 }
 progress {
   width: 100%;
-  height: 10px;
+  height: 8px;
   accent-color: #71943f;
 }
 .level {
-  margin: 12px 0;
+  margin: 6px 0;
 }
 .status {
-  font-size: 13px;
-  min-height: 22px;
+  font-size: 12px;
+  min-height: 18px;
 }
 .code {
   font-family: monospace;
-  font-size: 30px;
+  font-size: 24px;
   text-align: center;
   letter-spacing: 4px;
   background: #efeee7;
   border-radius: 8px;
-  padding: 12px;
-  margin: 15px 0;
+  padding: 8px;
+  margin: 10px 0;
 }
 .notice {
   background: #f6edcf;
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 11px;
+  flex-shrink: 0;
+  margin-bottom: 4px;
 }
 .result {
-  padding: 15px;
+  padding: 10px;
   background: #f3f5ee;
   border-radius: 8px;
   overflow-wrap: anywhere;
+  max-height: 80px;
+  overflow-y: auto;
 }
 .result p {
   white-space: pre-wrap;
 }
 kbd {
   font-family: inherit;
-  font-size: 12px;
+  font-size: 11px;
   background: #efeee7;
   border: 1px solid #dce0d7;
   border-radius: 4px;
-  padding: 2px 6px;
+  padding: 2px 5px;
 }
 footer {
   text-align: center;
-  padding: 20px;
+  padding: 8px;
+  flex-shrink: 0;
 }
-.overlay-body {
-  background: transparent;
+.overlay-body,
+.overlay-body:root {
+  background: transparent !important;
   overflow: hidden;
 }
 .overlay {

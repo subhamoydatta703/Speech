@@ -33,10 +33,14 @@
     "productName": "Speech",
     "asar": true,
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "build"
     },
+    "icon": "resources/icon.ico",
     "files": [
       "dist/**",
+      "resources/icon.ico",
+      "resources/icon.png",
       "resources/THIRD_PARTY_NOTICES.md",
       "package.json"
     ],
@@ -48,12 +52,21 @@
       {
         "from": "resources/windows",
         "to": "windows"
+      },
+      {
+        "from": "resources/icon.ico",
+        "to": "icon.ico"
+      },
+      {
+        "from": "resources/icon.png",
+        "to": "icon.png"
       }
     ],
     "win": {
       "target": "nsis",
       "artifactName": "Speech-Setup.exe",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": false,
+      "icon": "resources/icon.ico"
     },
     "nsis": {
       "oneClick": false,

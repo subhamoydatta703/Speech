@@ -20,6 +20,8 @@ for (const [entry, output, target] of [
 }
 await copyFile("src/ui/index.html", "dist/index.html");
 await copyFile("src/ui/styles.css", "dist/styles.css");
+await copyFile("resources/icon.ico", "dist/icon.ico");
+await copyFile("resources/icon.png", "dist/icon.png");
 // Release endpoints are public configuration; never copy backend or Clerk secrets.
 const config = JSON.parse(await readFile("resources/release.json", "utf8"));
 if (process.env.SPEECH_WEBSITE_URL)

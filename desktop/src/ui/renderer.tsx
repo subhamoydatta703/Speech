@@ -167,6 +167,7 @@ function App() {
       </main>
     );
   if (isOverlay) {
+    document.documentElement.className = "overlay-body";
     document.body.className = "overlay-body";
     return (
       <div className="overlay" role="status">
@@ -205,6 +206,7 @@ function App() {
           Local development build · account setup connects to localhost.
         </p>
       )}
+      <div className="sections">
       <section>
         <div className="section-title">
           <h2>1. Connect your account</h2>
@@ -290,8 +292,8 @@ function App() {
       <section>
         <h2>3. Speak, then keep writing</h2>
         <p>
-          Press <kbd>{status.shortcut}</kbd> in your document to start and stop.
-          Keep the target app focused. Recording limit: 60 seconds.
+          Hold <kbd>{status.shortcut}</kbd> in your document to speak.
+          Release to finish and paste. Keep the target app focused. Recording limit: 60 seconds.
         </p>
         <label>
           Microphone
@@ -393,6 +395,7 @@ function App() {
           </button>
         )}
       </section>
+      </div>
       <footer>
         Speech {status.version} · An AgEX product · Offline after setup
       </footer>
