@@ -1,14 +1,16 @@
 # Installation and releases
 
-> Current direction (2026-10-19): [Offline product plan](OFFLINE_PRODUCT_PLAN.md) and [backend change checklist](BACKEND_CHANGE_PLAN.md) supersede conflicting requirements below. STT and model downloads move to the desktop; Render keeps account APIs. This document contains historical planning. The account API migration is implemented; desktop work and live integration remain pending. See BACKEND_IMPLEMENTATION.md for current backend scope.
+> Latest requirement: sign in once on the website before download/install; installation must transfer authentication automatically without a second normal sign-in prompt. See [Authenticated distribution](AUTHENTICATED_DISTRIBUTION.md). Protected backend downloads exist; website, installer and automatic session handoff remain pending. Conflicting older journey descriptions below are superseded.
+
+> Updated 2026-10-19 for the offline MVP. See [Frontend implementation plan](FRONTEND_IMPLEMENTATION_PLAN.md) and [Offline product plan](OFFLINE_PRODUCT_PLAN.md). Installers and release hosting remain pending.
 
 
 
 ## Distribution proposal
 
-Windows 11 x64 is the initial target. Provide a signed per-user installer that includes the desktop app and `speech` CLI launcher. End users should not need Node.js, npm, Python, Git, or administrator access for standard installation. Start with one Windows packaging/update stack selected in the feasibility phase; do not combine incompatible installer/update formats.
+Windows 11 x64 is the initial target. Provide a signed per-user installer that includes the desktop app, pinned native inference engine and `speech` CLI launcher. Download the compatible public ungated model directly during installation or first-run setup; verify its immutable revision and checksum before loading. End users should not need Node.js, npm, Python, Git, or administrator access for standard installation. Start with one Windows packaging/update stack selected in the feasibility phase; do not combine incompatible installer/update formats.
 
-Website authentication precedes the normal download journey. Release packages and bootstrap scripts may be public, credential-free resources; the authenticated account experience and desktop device linking establish identity. If downloads must be gated, use short-lived URLs without putting Clerk credentials into terminal commands.
+Download and installation are public and do not require website sign-in. The installed app opens browser sign-in for initial activation. Model download and first activation require internet; subsequent local dictation does not. Never put credentials in installation commands. App and model downloads do not pass through Render.
 
 ## Planned terminal experience
 
@@ -26,14 +28,14 @@ Website should provide a copyable block plus direct installer download. Final bo
 Proposed CLI after installation:
 
 ```text
-speech login              Open website and link this device
+speech login              Open browser sign-in for app activation
 speech start              Launch tray app; return if already running
 speech stop               Quit app and stop active microphone capture
 speech status             Display version, running/auth/model state
 speech settings           Open settings window
 speech doctor             Diagnose microphone, shortcut, model, connectivity
 speech update             Check/apply a verified compatible update
-speech logout             Revoke device session and clear local credentials
+speech logout             Clear local credentials and activation; sign out through Clerk when possible
 ```
 
 Launch app immediately after install with consent; explain that a new terminal may be needed after PATH changes. Commands communicate with the existing single app instance through a permission-restricted local IPC channel, with no auth tokens in command arguments or stdout.
@@ -54,6 +56,6 @@ Installer reruns are idempotent. Offer explicit repair/update paths and prevent 
 
 Sign releases, publish immutable versioned artifacts, include release notes/checksums, and separate stable/beta channels. Select a packaging-compatible updater; Electron documents platform-specific behavior: [autoUpdater](https://www.electronjs.org/docs/latest/api/auto-updater). Schedule installation when no recording or insertion is active. Failed updates must leave a launchable app; rollback behavior must be validated for the chosen packaging system.
 
-Uninstall through Windows installed-app settings removes binaries, startup registration, PATH entries, app protocol/IPC registrations, and cached credentials. Ask whether to remove models/settings. Server device revocation is best effort when online; users can always revoke from the account page. Explain that uninstall alone while offline cannot immediately revoke remote sessions.
+Uninstall through Windows installed-app settings removes binaries, startup registration, PATH entries, app protocol/IPC registrations, and cached credentials. Ask whether to remove models/settings. There is no custom backend device revocation or device-management page. Uninstall clears local credentials; it does not promise immediate remote session revocation while offline. Account authentication remains managed by Clerk.
 
 A production release requires a real domain, configured artifact storage, trusted signing certificate/provider, reproducible build pipeline, release manifest validation, and a clean-machine install/update/uninstall report. No working install command can be supplied before those exist.

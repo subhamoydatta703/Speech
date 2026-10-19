@@ -1,9 +1,16 @@
-import type { FastifyInstance } from 'fastify';
-import type { RouteContext } from '../lib/route-context';
+import type { Express, RequestHandler } from 'express';
+import type { AuthenticatedRequest } from '../middleware/auth';
+import { prisma } from '../config/db';
+import { ApiError } from '../lib/errors';
 
-export async function registerUserRoutes(app: FastifyInstance, context: RouteContext) {
-  const { beginRequest, requireUser } = context;
-  app.get('/v1/me', { onRequest: [beginRequest, requireUser] }, async (request) => ({
-    user: request.user,
-  }));
+export function registerUserRoutes(app: Express, middleware: RequestHandler[]) {
+  app.get('/v1/me', ...middleware, async (req: AuthenticatedRequest, res) => {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId! },
+      select: { id: true, email: true },
+    });
+    if (!user)
+      throw new ApiError(503, 'DATABASE_UNAVAILABLE', 'The user profile is unavailable.', true);
+    if (!res.destroyed) res.json({ user });
+  });
 }

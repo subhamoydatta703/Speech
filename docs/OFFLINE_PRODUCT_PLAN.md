@@ -1,5 +1,7 @@
 # Offline desktop STT plan
 
+> Latest requirement: sign in once on the website before download/install; installation must transfer authentication automatically without a second normal sign-in prompt. See [Authenticated distribution](AUTHENTICATED_DISTRIBUTION.md). Protected backend downloads exist; website, installer and automatic session handoff remain pending. Conflicting older journey descriptions below are superseded.
+
 Updated: 2026-10-19. Status: approved direction, implementation pending. This plan and [backend changes](BACKEND_CHANGE_PLAN.md) supersede conflicting earlier plans. The backend account API migration is now implemented locally; desktop and distribution work remains pending. See the backend checklist for the exact migration status.
 
 ## Product we are building
@@ -13,7 +15,7 @@ The default model is downloaded directly from a public, ungated model repository
 | Area | Direction |
 | --- | --- |
 | Website | Separate `frontend/`, Next.js and TypeScript; existing Figma reference remains the design source |
-| Backend | Separate `backend/`, Bun, TypeScript, Fastify |
+| Backend | Separate `backend/`, Bun, TypeScript, Express |
 | Database | Neon PostgreSQL, Prisma 7, PrismaPg; existing `User.id` and `User.email` only |
 | Desktop | Separate `desktop/`; proposed Electron, React and TypeScript |
 | First platform | Proposed Windows 11 x64; validate before promising other platforms |
@@ -121,3 +123,7 @@ Keep files in responsibility-based folders with descriptive names. Do not move t
 [whisper.cpp](https://github.com/ggml-org/whisper.cpp) documents local inference and compatible model downloads. [Clerk Electron quickstart](https://clerk.com/docs/electron/getting-started/quickstart) describes its currently beta native integration. [Clerk OAuth](https://clerk.com/docs/guides/configure/auth-strategies/oauth/scoped-access) and [native app authentication guidance](https://www.rfc-editor.org/rfc/rfc8252) inform the authentication feasibility work.
 
 Pending evidence: final model/license/download revision, minimum hardware, launch languages, packaged sign-in token contract, Windows insertion adapter, signing and release host. These do not block documenting or simplifying the existing backend, but dependent implementation must pass its gate before release.
+
+Frontend details: [Frontend implementation plan](FRONTEND_IMPLEMENTATION_PLAN.md) defines the current pages, API integration, download states and acceptance checklist.
+
+Current backend handoff: [Installation activation API](INSTALLATION_AUTH_API.md) defines implemented start/inspect/approve/exchange endpoints. Website/installer integration remains pending. This supersedes earlier statements that these backend endpoints do not exist. The exchange returns offline activation, not a copied Clerk session.

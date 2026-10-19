@@ -1,6 +1,8 @@
 # Design and interaction requirements
 
-> Current direction (2026-10-19): [Offline product plan](OFFLINE_PRODUCT_PLAN.md) and [backend change checklist](BACKEND_CHANGE_PLAN.md) supersede conflicting requirements below. STT and model downloads move to the desktop; Render keeps account APIs. This document contains historical planning. The account API migration is implemented; desktop work and live integration remain pending. See BACKEND_IMPLEMENTATION.md for current backend scope.
+> Latest requirement: sign in once on the website before download/install; installation must transfer authentication automatically without a second normal sign-in prompt. See [Authenticated distribution](AUTHENTICATED_DISTRIBUTION.md). Protected backend downloads exist; website, installer and automatic session handoff remain pending. Conflicting older journey descriptions below are superseded.
+
+> Updated 2026-10-19 for the offline MVP. Read [Frontend implementation plan](FRONTEND_IMPLEMENTATION_PLAN.md) and [Offline product plan](OFFLINE_PRODUCT_PLAN.md). Visual inspection and frontend implementation remain pending.
 
 
 
@@ -22,9 +24,9 @@ Inspection status: the supplied Figma Sites URL could not be opened by the web i
 
 - Adapt template navigation and landing-page sections to the product's sign-in, download, workflow, features, privacy, and help content. Map actual sections after source inspection rather than assuming a section inventory.
 - Use product copy describing installable speech-to-text software, global shortcuts, microphone feedback, and supported text insertion.
-- Make the primary action lead to Clerk sign-in and the authenticated download journey.
+- Make the primary action Download for Windows, available without sign-in. Offer sign-in separately for account access; the installed app starts browser sign-in during activation.
 - Include direct installer download and copyable PowerShell installation instructions with version/platform details on the downloads page.
-- Extend the template's verified visual language to account, device approval, device management, and help screens even if the original template lacks these pages.
+- Extend the template's verified visual language to account, desktop sign-in return, and help screens even if the original template lacks these pages.
 - Integrate Clerk components with matching styles while preserving their authentication behavior and accessibility.
 - Retain responsive layouts, keyboard focus indicators, reduced-motion behavior, and readable contrast when adapting the source.
 - Verify which source assets and fonts may be reused; replace unrelated company logos, testimonials, metrics, and product screenshots. Do not publish invented customer claims.
@@ -36,24 +38,24 @@ Before implementation, capture accessible screenshots/design context, inventory 
 
 | Screen | Required content and states |
 | --- | --- |
-| Home | Clear dictation proposition, short workflow, Windows support, privacy/mode explanation, sign-in/download CTA |
+| Home | Clear dictation proposition, short workflow, Windows support, offline processing explanation, public download CTA and secondary sign-in |
 | Sign-in/sign-up | Clerk UI, validation, session expiry, return to intended page |
 | Downloads | Detected platform with manual selection, installer version and architecture, checksum, direct download, copyable terminal instructions, prerequisites |
-| Device approval | App/device name, short matching code, expiry, approve/reject, success and already-used states |
-| Account/devices | Device list, last seen, revoke action, empty/loading/error states |
-| Help | Microphone access, shortcut conflict, failed insertion, proxy/network failures, uninstall |
+| Desktop sign-in return | Pending browser sign-in, validated return-to-app, cancelled/expired/invalid request, app not opening, retry; exact transport depends on auth feasibility |
+| Account | Verified current user ID/email, loading/error/expired-session states and website sign-out; no device list, last-seen data or revoke controls |
+| Help | Microphone access, shortcut conflict, failed insertion, initial model-download failures, offline readiness, account connection failures, uninstall |
 
-Copy buttons announce success through an accessible status message. Download instructions never include credentials. Unsupported platforms show availability honestly. Avoid unsupported speed, accuracy, “free forever,” or zero-retention claims about external providers.
+Copy buttons announce success through an accessible status message. Download instructions never include credentials. Unsupported platforms show availability honestly. Explain that setup, initial sign-in and updates need internet, while completed setup enables offline dictation. Avoid unsupported speed, accuracy or hardware claims. Do not imply that the browser can inspect the installed model.
 
 ## Desktop surfaces
 
-- Welcome and browser sign-in/linking flow with retry, cancel, and expiration.
+- Welcome and browser sign-in flow with retry, cancel and expiration; a successful website login alone must not claim the desktop has authenticated.
 - Microphone selection and test, volume indicator, denied/missing permission recovery.
 - Shortcut picker with live conflict validation and reset.
-- Local/cloud selection showing download size, network need, destination of recordings, and model readiness.
+- Local model setup showing download size, progress, verification, cancellation, retry, repair and readiness. No cloud selector. Account activation and model readiness are separate states.
 - Guided sample dictation and insertion check.
 - Tray menu: start/stop, open settings, sign-in state, updates, quit.
-- Settings: account, input, shortcut, language, model/mode, privacy, startup, version and update status.
+- Settings: account, input, shortcut, supported language options, local model, privacy, startup, version and update status.
 
 ## Recording overlay state machine
 

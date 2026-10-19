@@ -1,24 +1,26 @@
-import type { FastifyInstance } from 'fastify';
-import type { RouteContext } from '../lib/route-context';
+import type { Express, RequestHandler } from 'express';
 import { capabilitiesSchema } from '@speech/contracts';
-import { ApiError, untilAborted } from '../lib/errors';
+import { prisma } from '../config/db';
+import { ApiError } from '../lib/errors';
 
-export async function registerHealthRoutes(app: FastifyInstance, context: RouteContext) {
-  const { users, beginRequest, getRequestSignal } = context;
-  app.get('/v1/health', async () => ({ status: 'ok' }));
-  app.get('/v1/ready', { onRequest: beginRequest }, async (request) => {
+export function registerHealthRoutes(app: Express, beginRequest: RequestHandler) {
+  app.get('/v1/health', (_req, res) => {
+    res.json({ status: 'ok' });
+  });
+  app.get('/v1/ready', beginRequest, async (_req, res) => {
     try {
-      await untilAborted(users.ready(), getRequestSignal(request));
-    } catch (error) {
-      if (error instanceof ApiError) throw error;
+      await prisma.$queryRaw`SELECT 1`;
+    } catch {
       throw new ApiError(503, 'DATABASE_UNAVAILABLE', 'The database is not ready.', true);
     }
-    return { status: 'ready' };
+    if (!res.destroyed) res.json({ status: 'ready' });
   });
   const capabilities = capabilitiesSchema.parse({
     sttMode: 'local',
     cloudTranscription: false,
     storage: { audio: false, transcripts: false, userFields: ['id', 'email'] },
   });
-  app.get('/v1/capabilities', async () => capabilities);
+  app.get('/v1/capabilities', (_req, res) => {
+    res.json(capabilities);
+  });
 }
