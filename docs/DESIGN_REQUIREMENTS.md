@@ -1,5 +1,11 @@
 # Design and interaction requirements
 
+## Current implementation — 2026-10-19
+
+The frontend is implemented in `frontend/`. Updated reference: https://www.figma.com/site/914NaaK932moLZZrYeROVY/Modern--Clean-SaaS-Company--Community-?node-id=0-1 . Figma rejected both design-context and screenshot requests for lack of edit access. The user subsequently authorized independent design decisions. The implementation is an original clean SaaS adaptation, not a verified template reproduction, and uses no unverified Figma assets.
+
+Downloads require website sign-in. Account access uses the backend ID/email endpoint. Installation confirmation reuses the browser session and requires the installer code to match. The landing demo is explicitly an illustration and does not access the microphone. Public-download language in the historical requirements below is superseded.
+
 > Latest requirement: sign in once on the website before download/install; installation must transfer authentication automatically without a second normal sign-in prompt. See [Authenticated distribution](AUTHENTICATED_DISTRIBUTION.md). Protected backend downloads exist; website, installer and automatic session handoff remain pending. Conflicting older journey descriptions below are superseded.
 
 > Updated 2026-10-19 for the offline MVP. Read [Frontend implementation plan](FRONTEND_IMPLEMENTATION_PLAN.md) and [Offline product plan](OFFLINE_PRODUCT_PLAN.md). Visual inspection and frontend implementation remain pending.

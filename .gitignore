@@ -6,6 +6,17 @@ coverage/
 !.env.example
 *.tsbuildinfo
 .next/
+test-results/
+playwright-report/
 *.log
 backend/src/generated/
 backend/generated/
+desktop/release/
+desktop/resources/engine/
+desktop/resources/engine-unpacked/
+desktop/resources/whisper-engine.zip
+desktop/.smoke/
+desktop/resources/vclibs/
+desktop/resources/vclibs.zip
+desktop/resources/vc_redist.x64.exe
+desktop/resources/windows/vc_redist.x64.exe

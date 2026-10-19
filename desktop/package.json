@@ -1,0 +1,68 @@
+{
+  "name": "@speech/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Speech desktop dictation — an AgEX product",
+  "author": "AgEX",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "prepare:engine": "bun scripts/prepare-engine.ts",
+    "dev": "bun run build && electron .",
+    "package:windows": "bun run prepare:engine && bun run build && electron-builder --win nsis --x64",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test test"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/bun": "1.4.3",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "electron": "43.0.0",
+    "electron-builder": "26.0.12",
+    "typescript": "7.0.2"
+  },
+  "build": {
+    "appId": "com.agex.speech",
+    "productName": "Speech",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "resources/THIRD_PARTY_NOTICES.md",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/engine",
+        "to": "engine"
+      },
+      {
+        "from": "resources/windows",
+        "to": "windows"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "Speech-Setup.exe",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}
