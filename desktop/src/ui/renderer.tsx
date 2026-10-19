@@ -292,8 +292,8 @@ function App() {
       <section>
         <h2>3. Speak, then keep writing</h2>
         <p>
-          Hold <kbd>{status.shortcut}</kbd> in your document to speak.
-          Release to finish and paste. Keep the target app focused. Recording limit: 60 seconds.
+          Press <kbd>{status.shortcut}</kbd> in your document to start and stop.
+          Keep the target app focused. Recording limit: 60 seconds.
         </p>
         <label>
           Microphone
