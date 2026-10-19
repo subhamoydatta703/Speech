@@ -1,0 +1,35 @@
+- link "Skip to content":
+  - /url: "#main"
+- banner:
+  - link "Speech home":
+    - /url: /
+    - text: speech .
+  - navigation "Main navigation":
+    - link "How it works":
+      - /url: /#how-it-works
+    - link "Privacy":
+      - /url: /#privacy
+    - link "Help":
+      - /url: /help
+  - link "Sign in":
+    - /url: /sign-in
+  - link "Get Speech":
+    - /url: /download
+- main:
+  - text: ACCOUNT SETUP
+  - heading "Sign-in is coming online." [level=1]
+  - paragraph: Sign-in and downloads are temporarily unavailable. You can still explore how Speech works and read the setup guide.
+  - link "Read the setup guide":
+    - /url: /help
+- contentinfo:
+  - link "speech.":
+    - /url: /
+  - paragraph: Your words. Your computer.
+  - link "Help & setup":
+    - /url: /help
+  - link "Privacy":
+    - /url: /#privacy
+  - link "Account":
+    - /url: /account
+  - text: © 2026 Speech
+- alert

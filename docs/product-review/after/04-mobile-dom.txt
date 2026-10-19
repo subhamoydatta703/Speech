@@ -1,0 +1,84 @@
+- link "Skip to content":
+  - /url: "#main"
+- banner:
+  - link "Speech home":
+    - /url: /
+    - text: speech .
+  - navigation "Main navigation":
+    - link "How it works":
+      - /url: /#how-it-works
+    - link "Privacy":
+      - /url: /#privacy
+    - link "Help":
+      - /url: /help
+  - link "Sign in":
+    - /url: /sign-in
+  - link "Get Speech":
+    - /url: /download
+- main:
+  - text: DESIGNED FOR YOUR DESKTOP
+  - heading "Big thoughts. Less typing." [level=1]
+  - paragraph: Let your voice do the writing. Meet Speech, desktop dictation designed to keep your words on your computer.
+  - link "Get Speech for Windows":
+    - /url: /download
+  - link "See how it works":
+    - /url: "#how-it-works"
+  - paragraph: Windows release in development · Sign in before downloading
+  - text: ● ● ● A little room for big ideas ↗ A FRESH PAGE
+  - heading "It starts with a thought." [level=2]
+  - paragraph: A quick note. The first draft. That idea I don’t want to lose.
+  - text: Just you and your next idea. Plain text
+  - button "Play preview ↵"
+  - paragraph: Interactive illustration · No microphone is used
+  - text: LESS FRICTION. MORE EXPRESSION.
+  - heading "For the words that come easier out loud." [level=2]
+  - paragraph: From a fleeting thought to a thoughtful reply. Make space for the way you naturally think.
+  - text: ↗ Everyday notes ✳ First drafts ↗ Thoughtful replies ✳ Your next big idea A LITTLE SETUP. A NEW WAY TO WRITE.
+  - heading "From thought to text." [level=2]
+  - paragraph: One website sign-in. Local setup. Then a little more freedom to speak.
+  - article:
+    - text: ↗ Your workspace, your voice 01
+    - heading "Make yourself at home." [level=3]
+    - paragraph: Sign in on the website, then download the Windows installer when the release is available.
+  - article:
+    - text: ↓ A home for your words 02
+    - heading "Get ready, locally." [level=3]
+    - paragraph: Setup connects your account through the browser and downloads the speech model to your computer.
+  - article:
+    - text: ≋ A thought becomes text 03
+    - heading "Say what’s on your mind." [level=3]
+    - paragraph: Once setup is complete, use your configured shortcut to dictate into supported text fields—even offline.
+  - text: PERSONAL BY DESIGN
+  - heading "Your voice. On your terms." [level=2]
+  - paragraph: Speech is being built to transcribe on your computer. Your audio and transcripts don’t need to travel to our servers.
+  - link "Understand offline setup ↗":
+    - /url: /help
+  - heading "A little less cloud. A lot more local." [level=3]
+  - list:
+    - listitem: ✓Local speech model on your computer
+    - listitem: ✓Offline dictation after initial setup
+    - listitem: ✓Only your account ID and email stored online
+  - text: LOCAL-FIRST ARCHITECTURE A FEW THINGS TO KNOW
+  - heading "Good questions." [level=2]
+  - group: Is Speech a website or an app?
+  - group: Will it work without internet?
+  - group: Do I sign in again after installing?
+  - group: Can I download it today?
+  - group: Does it remove background noise?
+  - text: LET YOUR IDEAS DO THE TALKING
+  - heading "A little less typing. A little more you." [level=2]
+  - link "Get started with Speech ↗":
+    - /url: /download
+  - paragraph: Sign in to access downloads and setup.
+- contentinfo:
+  - link "speech.":
+    - /url: /
+  - paragraph: Your words. Your computer.
+  - link "Help & setup":
+    - /url: /help
+  - link "Privacy":
+    - /url: /#privacy
+  - link "Account":
+    - /url: /account
+  - text: © 2026 Speech
+- alert

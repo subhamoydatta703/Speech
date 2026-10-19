@@ -1,5 +1,13 @@
 # Frontend implementation plan
 
+## Implementation update — 2026-10-19
+
+The Next.js frontend now exists in `frontend/`: landing page, Clerk sign-in/sign-up, protected download and account pages, server-side installer streaming, and `/desktop/complete?id=...` installation confirmation. The website uses the existing backend API without changing backend source. See [frontend setup and limitations](../frontend/README.md).
+
+Current journey: sign in on the website → protected download → installer opens browser confirmation → match code and approve using the existing session → installer completes activation and local model setup. Download is never public. The older journey and route table below are historical and superseded by this section and `INSTALLATION_AUTH_API.md`.
+
+The latest Figma reference is `914NaaK932moLZZrYeROVY`, node `0:1`. The plugin denied edit access. The user authorized independent design decisions, so the frontend uses an original clean SaaS design; template fidelity is not verified. The real installer, production Clerk configuration and end-to-end desktop activation verification remain pending. No terminal installer command, version, or checksum is invented.
+
 > Latest requirement: sign in once on the website before download/install; installation must transfer authentication automatically without a second normal sign-in prompt. See [Authenticated distribution](AUTHENTICATED_DISTRIBUTION.md). Protected backend downloads exist; website, installer and automatic session handoff remain pending. Conflicting older journey descriptions below are superseded.
 
 Updated 2026-10-19. Requirements updated; frontend implementation remains pending. This replaces the earlier authenticated-download, device-management and cloud-mode website proposals. Read with [design requirements](DESIGN_REQUIREMENTS.md) and [offline product plan](OFFLINE_PRODUCT_PLAN.md).
