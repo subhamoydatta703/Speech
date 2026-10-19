@@ -24,7 +24,7 @@ export function abortError(signal: AbortSignal): ApiError {
     : new ApiError(499, 'CANCELLED', 'The request was cancelled.');
 }
 
-/** Bounds SDK work even when an injected/test transport fails to honor AbortSignal. */
+/** Bounds the response wait; database queries also have their own driver timeouts. */
 export async function untilAborted<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
   signal.throwIfAborted();
   let onAbort: (() => void) | undefined;

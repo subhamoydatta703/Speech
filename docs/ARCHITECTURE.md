@@ -1,6 +1,7 @@
 # Architecture
 
-> Backend scope update (2026-10-19): read [Current backend scope](BACKEND_IMPLEMENTATION.md). The backend proposals below predate the user's later decisions. Current implementation uses Bun, Prisma 7/PrismaPg, Neon with only user ID and email, JWT-based profile sync, and no webhooks or device-session storage.
+> Current direction (2026-10-19): [Offline product plan](OFFLINE_PRODUCT_PLAN.md) and [backend change checklist](BACKEND_CHANGE_PLAN.md) supersede conflicting requirements below. STT and model downloads move to the desktop; Render keeps account APIs. This document contains historical planning. The account API migration is implemented; desktop work and live integration remain pending. See BACKEND_IMPLEMENTATION.md for current backend scope.
+
 
 
 ## Application boundaries

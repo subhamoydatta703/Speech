@@ -1,6 +1,5 @@
 import { readConfig } from './config/env';
 import { createUserRepository } from './config/db';
-import { createHuggingFaceProvider } from './services/transcription.service';
 import { buildApp } from './app';
 
 async function main() {
@@ -8,7 +7,6 @@ async function main() {
   const users = createUserRepository(config.DATABASE_URL);
   const app = await buildApp(config, {
     users,
-    provider: createHuggingFaceProvider(config),
     logger: true,
   });
   let stopping = false;

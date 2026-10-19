@@ -10,7 +10,6 @@ export const testConfig: Config = readConfig({
   CLERK_JWT_KEY: publicKey,
   CLERK_ISSUER: 'https://speech-test.clerk.accounts.dev',
   CLERK_AUTHORIZED_PARTIES: 'http://localhost:3000',
-  HF_TOKEN: 'hf_test_only',
 });
 
 export async function token(overrides: JWTPayload = {}) {
@@ -45,47 +44,4 @@ export class TestUsers implements UserRepository {
   }
   async ready() {}
   async close() {}
-}
-
-export function wav(seconds = 0.2, amplitude = 10000): Buffer {
-  const length = Math.round(seconds * 16000) * 2;
-  const buffer = Buffer.alloc(44 + length);
-  buffer.write('RIFF');
-  buffer.writeUInt32LE(36 + length, 4);
-  buffer.write('WAVEfmt ', 8);
-  buffer.writeUInt32LE(16, 16);
-  buffer.writeUInt16LE(1, 20);
-  buffer.writeUInt16LE(1, 22);
-  buffer.writeUInt32LE(16000, 24);
-  buffer.writeUInt32LE(32000, 28);
-  buffer.writeUInt16LE(2, 32);
-  buffer.writeUInt16LE(16, 34);
-  buffer.write('data', 36);
-  buffer.writeUInt32LE(length, 40);
-  for (let i = 0; i < length; i += 2)
-    buffer.writeInt16LE(Math.round(Math.sin(i / 20) * amplitude), 44 + i);
-  return buffer;
-}
-
-export function upload(audio = wav(), fields: Record<string, string> = {}) {
-  const boundary = 'speech-test-boundary';
-  const parts: Buffer[] = [];
-  for (const [key, value] of Object.entries(fields)) {
-    parts.push(
-      Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="${key}"\r\n\r\n${value}\r\n`,
-      ),
-    );
-  }
-  parts.push(
-    Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="audio"; filename="voice.wav"\r\nContent-Type: audio/wav\r\n\r\n`,
-    ),
-    audio,
-    Buffer.from(`\r\n--${boundary}--\r\n`),
-  );
-  return {
-    payload: Buffer.concat(parts),
-    contentType: `multipart/form-data; boundary=${boundary}`,
-  };
 }

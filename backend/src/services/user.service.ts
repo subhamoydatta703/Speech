@@ -1,6 +1,7 @@
 import { ApiError } from '../lib/errors';
 
-export type User = { id: string; email: string };
+import type { User } from '@speech/contracts';
+export type { User } from '@speech/contracts';
 export interface UserRepository {
   find(id: string): Promise<User | null>;
   upsert(user: User): Promise<User>;

@@ -20,8 +20,6 @@
     "@clerk/backend": "3.25.0",
     "@fastify/cors": "11.3.1",
     "@fastify/helmet": "13.2.0",
-    "@fastify/multipart": "10.1.4",
-    "@huggingface/inference": "4.13.32",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@speech/contracts": "workspace:*",

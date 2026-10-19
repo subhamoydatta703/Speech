@@ -10,7 +10,6 @@ describe('Clerk JWT authentication and profile sync', () => {
     users = new TestUsers();
     app = await buildApp(testConfig, {
       users,
-      provider: { model: 'test', transcribe: async () => 'hello' },
     });
   });
   afterEach(async () => {
