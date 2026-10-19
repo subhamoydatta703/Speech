@@ -28,7 +28,7 @@ export default function Home() {
           </a>
         </div>
         <p className="fine-print">
-          Windows release in development · Sign in before downloading
+         Sign in before downloading
         </p>
         <DictationDemo />
       </section>
