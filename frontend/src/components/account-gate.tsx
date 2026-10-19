@@ -17,7 +17,7 @@ export async function AccountGate({
         <h1>Sign-in is coming online.</h1>
         <p>
           Sign-in and downloads are temporarily unavailable. You can still explore
-          how Speech works and read the setup guide.
+          how speech works and read the setup guide.
         </p>
         <Link className="button" href="/help">Read the setup guide</Link>
       </main>

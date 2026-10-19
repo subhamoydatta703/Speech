@@ -96,6 +96,48 @@ p {
 .brand-dot {
   color: #7f9d50;
 }
+.brand-lockup {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.brand-parent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  padding: 0;
+  border: none;
+  line-height: 1;
+  text-decoration: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+.brand-parent-badge strong {
+  font-weight: 650;
+  color: var(--ink);
+  transition: color 0.15s ease;
+}
+.brand-parent-badge .badge-arrow {
+  font-size: 11px;
+  opacity: 0.6;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.brand-parent-badge:hover {
+  color: var(--ink);
+}
+.brand-parent-badge:hover strong {
+  color: #71943f;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.brand-parent-badge:hover .badge-arrow {
+  opacity: 1;
+  transform: translate(1px, -1px);
+  color: #71943f;
+}
 .header nav,
 .header-actions {
   display: flex;
@@ -532,6 +574,15 @@ footer p {
   font-weight: 650;
   color: var(--ink);
 }
+.attribution-link {
+  color: inherit;
+  text-decoration: none;
+}
+.attribution-link:hover strong {
+  color: #71943f;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 footer > div {
   display: flex;
   gap: 22px;
@@ -727,6 +778,14 @@ dd {
   }
   .brand {
     font-size: 25px;
+  }
+  .brand-lockup {
+    gap: 8px;
+    align-items: baseline;
+  }
+  .brand-parent-badge {
+    font-size: 11px;
+    padding: 0;
   }
   .header nav {
     display: flex;

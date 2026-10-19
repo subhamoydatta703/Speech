@@ -16,12 +16,12 @@ export default function Home() {
         <p className="hero-description">
           Let your voice do the writing.
           <br />
-          Meet Speech, desktop dictation designed to keep your words on your
+          Meet speech, desktop dictation designed to keep your words on your
           computer.
         </p>
         <div className="cta-row">
           <Link className="button" href="/download">
-            Get Speech for Windows <span aria-hidden="true">↗</span>
+            Get speech for Windows <span aria-hidden="true">↗</span>
           </Link>
           <a className="text-link" href="#how-it-works">
             See how it works <span aria-hidden="true">↓</span>
@@ -107,7 +107,7 @@ export default function Home() {
             On your terms.
           </h2>
           <p>
-            Speech is being built to transcribe on your computer. Your audio and
+            speech is being built to transcribe on your computer. Your audio and
             transcripts don’t need to travel to our servers.
           </p>
           <Link className="text-link" href="/help">
@@ -135,8 +135,8 @@ export default function Home() {
         <h2>Good questions.</h2>
         {[
           [
-            "Is Speech a website or an app?",
-            "Speech is desktop software. This website handles your account, download, and installation confirmation. Dictation runs on your computer.",
+            "Is speech a website or an app?",
+            "speech is desktop software. This website handles your account, download, and installation confirmation. Dictation runs on your computer.",
           ],
           [
             "Will it work without internet?",
@@ -171,7 +171,7 @@ export default function Home() {
           <br />A little more you.
         </h2>
         <Link className="button" href="/download">
-          Get started with Speech ↗
+          Get started with speech ↗
         </Link>
         <p>Sign in to access downloads and setup.</p>
       </section>

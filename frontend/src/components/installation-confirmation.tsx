@@ -56,7 +56,7 @@ export function InstallationConfirmation({
           account and downloading the model.
         </p>
         <p>
-          Wait for setup to confirm that Speech is ready before dictating
+          Wait for setup to confirm that speech is ready before dictating
           offline.
         </p>
       </div>

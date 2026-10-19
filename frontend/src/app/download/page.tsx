@@ -7,7 +7,7 @@ export default function DownloadPage() {
         <span className="eyebrow">YOUR NEXT STEP</span>
         <h1>Make room for your voice.</h1>
         <p>
-          Set up Speech on your computer. Your website session connects your
+          Set up speech on your computer. Your website session connects your
           account during installation.
         </p>
         <div className="panel download-panel">
@@ -15,7 +15,7 @@ export default function DownloadPage() {
             ⊞
           </span>
           <div>
-            <h2>Speech for Windows</h2>
+            <h2>speech for Windows</h2>
             <p>Windows 11 · x64 target</p>
             <p className="muted">
               Release in development. Downloads become available when the

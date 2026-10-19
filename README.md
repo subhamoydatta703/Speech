@@ -138,4 +138,4 @@ https://github.com/subhamoydatta703/Speech/releases/download/v0.1.0/Speech-Setup
 
 ## License
 
-Private — an [AgEX](https://agex.dev) product.
+Private — an [AgEX](https://agexai.vercel.app/) product.

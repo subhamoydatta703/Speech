@@ -8,7 +8,7 @@ test('capture the current public onboarding journey for product review', async (
   await page.goto('/');
   await writeFile(`${folder}/01-home-dom.txt`, await page.locator('body').ariaSnapshot());
   await page.screenshot({ path: `${folder}/01-home.png` });
-  await page.getByRole('link', { name: /Get Speech for Windows/ }).click();
+  await page.getByRole('link', { name: /Get speech for Windows/i }).click();
   await page.getByRole('heading', { name: 'Sign-in is coming online.' }).waitFor();
   await page.screenshot({ path: `${folder}/02-download-gate.png` });
   await writeFile(`${folder}/02-download-dom.txt`, await page.locator('body').ariaSnapshot());

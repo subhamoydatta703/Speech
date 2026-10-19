@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    default: "Speech — Give your thoughts a voice",
-    template: "%s | Speech",
+    default: "speech — Give your thoughts a voice",
+    template: "%s | speech",
   },
   description:
     "Desktop dictation designed for local, offline speech-to-text. Sign in, set up, and make room for your ideas.",
@@ -35,15 +35,33 @@ export default function RootLayout({
         <p>
           Your words. Your computer.
           <span className="product-attribution">
-            An <strong>AgEX</strong> product
+            An{" "}
+            <a
+              href="https://agexai.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="attribution-link"
+              title="Visit AgEX"
+            >
+              <strong>AgEX</strong> ↗
+            </a>{" "}
+            product
           </span>
         </p>
         <div>
           <Link href="/help">Help & setup</Link>
           <Link href="/#privacy">Privacy</Link>
           <Link href="/account">Account</Link>
+          <a
+            href="https://agexai.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Visit AgEX"
+          >
+            AgEX ↗
+          </a>
         </div>
-        <small>© {new Date().getFullYear()} Speech</small>
+        <small>© {new Date().getFullYear()} speech</small>
       </footer>
     </>
   );
