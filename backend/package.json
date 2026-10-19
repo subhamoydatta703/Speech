@@ -1,0 +1,39 @@
+{
+  "name": "@speech/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/server.ts",
+    "build": "bun run db:generate && tsc --noEmit && bun build src/server.ts --target bun --packages external --outdir dist",
+    "start": "bun dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "db:generate": "bunx --bun prisma generate",
+    "db:validate": "bunx --bun prisma validate",
+    "db:migrate": "bunx --bun prisma migrate deploy",
+    "db:dev": "bunx --bun prisma migrate dev",
+    "format": "prettier --write src test prisma.config.ts ../packages/contracts/src",
+    "format:check": "prettier --check src test prisma.config.ts ../packages/contracts/src"
+  },
+  "dependencies": {
+    "@clerk/backend": "3.25.0",
+    "@fastify/cors": "11.3.1",
+    "@fastify/helmet": "13.2.0",
+    "@fastify/multipart": "10.1.4",
+    "@huggingface/inference": "4.13.32",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "@speech/contracts": "workspace:*",
+    "fastify": "5.12.7",
+    "pg": "8.23.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.3",
+    "jose": "6.2.12",
+    "prettier": "3.9.10",
+    "prisma": "7.10.1",
+    "typescript": "7.0.2"
+  }
+}
