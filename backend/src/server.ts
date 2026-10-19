@@ -3,7 +3,7 @@ import { buildApp } from './app';
 
 async function main() {
   const config = {
-    HOST: process.env.HOST ?? '127.0.0.1',
+    HOST: process.env.HOST ?? '0.0.0.0',
     PORT: Number(process.env.PORT ?? 4000),
     CLERK_PUBLISHABLE_KEY: process.env.CLERK_PUBLISHABLE_KEY ?? '',
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY ?? '',
