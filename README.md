@@ -1,10 +1,10 @@
-# Speech
+# speech
 
-**Give your thoughts a voice.** — Local-first desktop dictation powered by [Whisper](https://github.com/ggml-org/whisper.cpp). Speak naturally and Speech types for you, completely offline after setup.
+**Give your thoughts a voice.** — Local-first desktop dictation powered by [Whisper](https://github.com/ggml-org/whisper.cpp). Speak naturally and speech types for you, completely offline after setup.
 
 ## Overview
 
-Speech is a voice-to-text desktop application for Windows. Users sign in on the website, download the installer, and activate with a one-time browser confirmation. After the speech model is downloaded, all transcription runs locally — no cloud, no data leaves your machine.
+speech is a voice-to-text desktop application for Windows. Users sign in on the website, download the installer, and activate with a one-time browser confirmation. After the speech model is downloaded, all transcription runs locally — no cloud, no data leaves your machine.
 
 | Component | Stack | Purpose |
 | --- | --- | --- |
@@ -57,7 +57,7 @@ bun run dev            # builds and launches the Electron app
 ### Build the Windows installer
 
 ```bash
-bun run package:windows   # outputs desktop/release/Speech-Setup.exe
+bun run package:windows   # outputs desktop/release/speech-Setup.exe
 ```
 
 ## Repository layout
@@ -79,7 +79,7 @@ The installer is served through an authenticated flow:
 3. Frontend calls `HEAD /api/download` to check availability
 4. Backend verifies the Clerk JWT and streams the installer
 
-**Development:** `WINDOWS_INSTALLER_PATH` points to a local file (e.g. `../desktop/release/Speech-Setup.exe`).
+**Development:** `WINDOWS_INSTALLER_PATH` points to a local file (e.g. `../desktop/release/speech-Setup.exe`).
 
 **Production:** `WINDOWS_INSTALLER_PATH` can be a URL (e.g. a GitHub Release asset). The backend streams it to the user so the download appears to come from your domain.
 
@@ -105,18 +105,18 @@ The installer is served through an authenticated flow:
 
 ### Installer hosting
 
-Upload `Speech-Setup.exe` to a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github) and set `WINDOWS_INSTALLER_PATH` to the download URL:
+Upload `speech-Setup.exe` to a [GitHub Release](https://docs.github.com/en/repositories/releasing-projects-on-github) and set `WINDOWS_INSTALLER_PATH` to the download URL:
 
 ```
-https://github.com/subhamoydatta703/Speech/releases/download/v0.1.0/Speech-Setup.exe
+https://github.com/subhamoydatta703/speech/releases/download/v0.1.0/speech-Setup.exe
 ```
 
 ## How it works
 
-1. **Download & install** — User downloads `Speech-Setup.exe` from the website after signing in.
+1. **Download & install** — User downloads `speech-Setup.exe` from the website after signing in.
 2. **Activate** — The installer generates a confirmation code. The user matches it in their browser to link the installation to their account.
 3. **Model download** — On first launch, the app downloads the Whisper base model (~148 MB) from Hugging Face. This is a one-time step.
-4. **Dictate** — Press the global shortcut to start recording. Speech transcribes locally using whisper.cpp and types the result into the active application.
+4. **Dictate** — Press the global shortcut to start recording. speech transcribes locally using whisper.cpp and types the result into the active application.
 
 ## Privacy
 
