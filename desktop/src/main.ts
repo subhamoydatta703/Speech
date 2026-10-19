@@ -357,6 +357,8 @@ else {
         height: 70,
         frame: false,
         transparent: true,
+        backgroundColor: "#00000000",
+        hasShadow: false,
         alwaysOnTop: true,
         skipTaskbar: true,
         focusable: false,
