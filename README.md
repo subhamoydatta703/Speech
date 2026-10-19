@@ -2,7 +2,7 @@
 
 Status: the backend has been migrated to a lightweight account API for offline desktop STT. The desktop app, installer, frontend and live integrations remain pending. Start with the [offline product plan](docs/OFFLINE_PRODUCT_PLAN.md), [backend checklist](docs/BACKEND_CHANGE_PLAN.md) and [backend setup](backend/README.md).
 
-Build an installable voice-to-text assistant inspired by the category of products such as Willow Voice. Users install the desktop software, sign in through the browser, download a local model during setup, and dictate into the active application using a global keyboard shortcut. After setup, transcription works offline.
+Build an installable voice-to-text assistant inspired by the category of products such as Willow Voice. Users sign in on the website, download/install the desktop software, and complete automatic authenticated setup without another normal login prompt. A local model enables dictation into the active application using a global keyboard shortcut. After setup, transcription works offline.
 
 The website supports the desktop product through browser sign-in, downloads, installation instructions, and help. The installed app performs recording, displays an animated recording overlay, and inserts text.
 
@@ -19,7 +19,7 @@ The website supports the desktop product through browser sign-in, downloads, ins
 
 ## Proposed starting point
 
-Desktop proposal: Windows 11 x64 with Electron + React + TypeScript. Implemented backend: Bun, Fastify, Prisma ORM 7 with PrismaPg, Neon PostgreSQL storing only user ID/email, and no hosted inference dependencies. Clerk JWTs supply identity and email without a user API lookup. No webhooks, device records, audio history, or transcript history. External services still need live configuration and validation.
+Desktop proposal: Windows 11 x64 with Electron + React + TypeScript. Implemented backend: Bun, Express, Prisma ORM 7 with PrismaPg, Neon PostgreSQL storing only user ID/email, and no hosted inference dependencies. Clerk JWTs supply identity and email without a user API lookup. No webhooks, device records, audio history, or transcript history. External services still need live configuration and validation.
 
 ## Documents
 
@@ -27,11 +27,12 @@ Desktop proposal: Windows 11 x64 with Electron + React + TypeScript. Implemented
 | --- | --- |
 | [Offline product plan](docs/OFFLINE_PRODUCT_PLAN.md) | Current scope, desktop flow, phases and acceptance gates |
 | [Backend changes](docs/BACKEND_CHANGE_PLAN.md) | Current-code migration checklist and endpoint changes |
+| [Frontend plan](docs/FRONTEND_IMPLEMENTATION_PLAN.md) | Public downloads, desktop sign-in, account UI and implementation checklist |
 | [Product requirements](docs/PRODUCT_REQUIREMENTS.md) | Scope, user journeys, acceptance criteria |
 | [Architecture](docs/ARCHITECTURE.md) | Folder boundaries, runtime design, deployment |
 | [Design requirements](docs/DESIGN_REQUIREMENTS.md) | Website, desktop overlay, interaction states, Figma handoff |
 | [STT pipeline](docs/STT_PIPELINE.md) | Audio handling, model options, evaluation |
-| [Authentication and API](docs/AUTH_AND_API.md) | Clerk browser sign-in, device linking, API contracts |
+| [Authentication and API](docs/AUTH_AND_API.md) | Clerk browser/desktop sign-in, current account API contracts |
 | [Installation and releases](docs/INSTALLATION_AND_RELEASES.md) | Installer, terminal commands, updates, uninstall |
 | [Security and data](docs/SECURITY_AND_DATA.md) | Permissions, credentials, retention, trust boundaries |
 | [Implementation plan](docs/IMPLEMENTATION_PLAN.md) | Ordered phases with completion gates |
@@ -53,3 +54,5 @@ docs/                 # Requirements, plans, decisions
 ```
 
 The backend and shared contracts now exist. The remaining application folders are planned. Follow backend/README.md for installation, configuration, tests and startup; the offline product plan and backend change checklist govern future implementation. The backend setup guide describes the migrated account API; desktop authentication compatibility remains pending.
+
+Latest installation flow: [Sign in once and install](docs/AUTHENTICATED_DISTRIBUTION.md). The authenticated backend download endpoint exists; automatic installer/app session handoff remains to be built.

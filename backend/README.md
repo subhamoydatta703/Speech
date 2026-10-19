@@ -1,134 +1,94 @@
 # Speech account backend
 
-Bun + TypeScript + Fastify account API. Clerk verifies identity, and Prisma ORM 7 connects to Neon PostgreSQL through `PrismaPg`. The only application table is `User`, with `id` and `email`.
+Bun + TypeScript + Express. Clerk Express verifies authentication before the user's supplied `src/middleware/auth.ts`. That file is preserved unchanged and excluded from automatic formatting.
 
-Speech recognition is planned for the desktop application. This API does not accept recordings, perform inference, download models, or store transcripts. No Hugging Face token is required. There are no webhook, device-management, refresh-token, or transcript-history endpoints.
+## Configuration and startup
 
-The hosted-STT removal is implemented. Desktop browser sign-in and offline dictation still need implementation and end-to-end validation. See the [product plan](../docs/OFFLINE_PRODUCT_PLAN.md) and [migration checklist](../docs/BACKEND_CHANGE_PLAN.md).
+Copy `.env.example` to `.env` in `backend/` and configure:
 
-## Run locally
+- `DATABASE_URL`: Neon PostgreSQL connection string.
+- `CLERK_PUBLISHABLE_KEY`: Clerk dashboard publishable key.
+- `CLERK_SECRET_KEY`: Clerk dashboard secret key; backend only.
+- `CORS_ORIGINS`: comma-separated allowed website origins, also used for Clerk authorized-party checks. Default development origin is `http://localhost:3000`.
 
-From the repository root:
+No manually configured JWT public key, issuer or separate authorized-parties variable is required. Clerk obtains verification keys through its SDK; this can require network access on a key-cache miss. ID/email come from verified claims without a Clerk user-profile API lookup.
 
-```powershell
-bun install --frozen-lockfile
-Copy-Item backend/.env.example backend/.env
+Configure this custom Clerk session claim:
+
+```json
+{ "email": "{{user.primary_email_address}}" }
 ```
 
-Configure Neon and Clerk, then run:
+From the repository root run `bun install --frozen-lockfile`. Then in `backend/`:
 
 ```powershell
-cd backend
 bun run db:generate
 bun run db:validate
 bun run db:migrate
 bun run dev
 ```
 
-The migration creates the existing ID/email user table. Verify the database target before running it. This work has not applied a migration to your Neon account. Bun loads `.env` from the backend working directory. The default API URL is `http://127.0.0.1:4000`.
+Bun loads `backend/.env`. `config/db.ts` under `src/` uses the user-provided PrismaPg connection pattern. Prisma generates into the repository-root `generated/prisma/` directory; the root Prisma runtime dependency supports that location. `backend/config/db/dbConfig.ts` re-exports the same client at the exact import path used by the supplied middleware. It does not create a second client.
 
-## Configuration
+Both user-table migrations were applied to Neon and a live PrismaPg read verified connectivity. The schema has `id` with a Prisma-generated UUID default and unique `email`. Authentication explicitly supplies the Clerk ID.
 
-| Variable | Purpose |
+## Routes and authentication behavior
+
+| Route | Behavior |
 | --- | --- |
-| `DATABASE_URL` | Neon pooled PostgreSQL URL with TLS, used by the API |
-| `DIRECT_URL` | Neon direct URL for migrations; falls back to `DATABASE_URL` |
-| `CLERK_JWT_KEY` | Clerk PEM public key; literal `\n` line breaks supported |
-| `CLERK_ISSUER` | Exact Clerk issuer URL |
-| `CLERK_AUTHORIZED_PARTIES` | Exact HTTP(S) origins permitted in session token `azp` |
-| `CORS_ORIGINS` | Exact origins permitted for browser API calls |
-| `HOST`, `PORT` | Listen address; default `127.0.0.1:4000` |
-| `MAX_CONCURRENT_REQUESTS` | Active account/readiness requests per process; default 4 |
-| `REQUESTS_PER_MINUTE` | Global account/readiness attempt limit per process; default 60 |
-| `REQUEST_TIMEOUT_MS` | Response wait deadline; default 10000 ms |
+| `GET /v1/health` | Public process liveness |
+| `GET /v1/ready` | Public database readiness |
+| `GET /v1/capabilities` | Public local-STT architecture and storage policy |
+| `GET /v1/downloads/windows` | Clerk and supplied auth middleware required; streams the configured private installer |
+| `GET /v1/me` | Request limits, Clerk verification, supplied auth middleware, then ID/email response |
 
-No HF variables, upload limits or model paths are used. Rate limits are global in-memory counters, not per-user records or distributed quotas.
+For `/v1/me`, Clerk middleware must run before `authMiddleware`, because `getAuth(req)` reads Clerk's attached authentication state. The supplied middleware queries Prisma by verified user ID, requires email for a new user, upserts the new profile and attaches `req.userId`. The route then reads that profile and returns `{ user: { id, email } }`.
 
-## Authentication contract
+Existing users take the supplied fast path: their stored email is not updated from later token changes, and a missing email claim does not fail that path. These semantics intentionally match the user's code. Authentication errors retain its `{ success: false, message }` response and its status codes. Other API errors use `{ requestId, error: { code, message, retryable } }`; clients must handle both shapes.
 
-In Clerk session token customization, add:
+The supplied middleware logs caught errors directly. The surrounding error handler does not log raw errors; this does not override the supplied file's logging behavior. No device, webhook, refresh-token, audio-upload or transcription endpoints exist.
 
-```json
-{ "email": "{{user.primary_email_address}}" }
-```
+## Server behavior
 
-The backend currently accepts **Clerk session tokens** via `Authorization: Bearer <token>`. It verifies signature, issuer, expiry, allowed `azp`, completed session state, `sub`, `sid`, and email. It derives identity only from verified claims. It reads the user by ID and upserts only on first use or changed email; a concurrent-insert race is handled. It does not call Clerk's user API.
+Responses have no-store and request-ID headers. CORS and Clerk use the configured website origins. Account/readiness requests use per-process concurrency and attempt limits without storing users or IP addresses. `REQUEST_TIMEOUT_MS` closes stalled HTTP connections; it does not cancel an already-running Prisma query or produce a guaranteed JSON timeout response. The server closes its listener and Prisma client on shutdown.
 
-Refresh the client session after changing claims. Offline JWT verification does not detect revocation immediately, and the configured public key must be rotated when Clerk changes signing keys. Without webhooks, deleting a Clerk account does not automatically delete its Neon row; cleanup remains an operator action.
-
-**Desktop integration is pending.** A native SDK or OAuth token must be checked against this contract before it can call this API. OAuth access tokens are not interchangeable with session tokens. No custom device-link endpoints or weaker validation have been added. The desktop's future offline activation state will not authorize online API access.
-
-## Endpoints
-
-| Method | Path | Authentication | Result |
-| --- | --- | --- | --- |
-| GET | `/v1/health` | Public | Process liveness, no database call |
-| GET | `/v1/ready` | Public | Bounded database readiness check |
-| GET | `/v1/capabilities` | Public | Local STT architecture and storage policy |
-| GET | `/v1/me` | Clerk bearer token | Synchronize and return current ID/email |
-
-`/v1/me` response:
-
-```json
-{ "user": { "id": "user_example", "email": "user@example.com" } }
-```
-
-`/v1/capabilities` response:
-
-```json
-{
-  "sttMode": "local",
-  "cloudTranscription": false,
-  "storage": { "audio": false, "transcripts": false, "userFields": ["id", "email"] }
-}
-```
-
-Capabilities describe the API, not whether a desktop model is installed or usable. There is no transcription endpoint. Requests to removed routes return 404; unsupported request bodies can be rejected with 415 before routing. Do not upload audio to this API.
-
-Errors have `{ requestId, error: { code, message, retryable } }`. Responses include `Cache-Control: no-store` and a generated `X-Request-Id`. Typical errors are 401 for invalid credentials, 400 for missing/invalid email claims, 403 for disallowed origins, 429 for attempt limits, 503 for unavailable database/capacity, and 504 `REQUEST_TIMEOUT` for an exceeded deadline. Logs omit tokens, emails, bodies and raw database exceptions.
+Only user ID/email are persisted. Model downloads and transcription belong to the planned desktop application; no Hugging Face token or model is needed by this API.
 
 ## Code map
 
-```text
-src/
-  server.ts                       Startup and graceful shutdown
-  app.ts                          API composition and security headers
-  config/
-    env.ts                        Configuration validation
-    db.ts                         Shared PrismaPg client and user repository
-  middleware/
-    auth.ts                       Verified identity and user synchronization
-    error-handler.ts              Safe structured API errors
-    request-lifecycle.ts          Admission, deadlines and cleanup
-  routes/
-    health.ts                     Liveness, readiness and capabilities
-    users.ts                      Current account
-  services/
-    user.service.ts               Profile read/upsert rules
-  lib/
-    errors.ts                     Errors and bounded response waits
-    limiter.ts                    Process-wide admission counters
-    route-context.ts              Shared route dependencies
-  generated/prisma/               Generated client; do not edit
-prisma/                           Two-column user schema and initial migration
-test/                             Account API and verified-JWT tests
-```
+- `src/app.ts`: Express composition and Clerk-before-auth ordering.
+- `src/server.ts`: environment reads, listener and shutdown.
+- `src/config/db.ts`: PrismaPg connection supplied by the user.
+- `src/middleware/auth.ts`: user-supplied middleware, unchanged.
+- `src/middleware/request-lifecycle.ts`: admission and connection deadlines.
+- `src/middleware/error-handler.ts`: errors outside the supplied auth middleware.
+- `src/routes/`: health/capabilities and current-user endpoints.
+- `src/types/app-config.ts`: HTTP settings type; no env.ts file.
 
-Shared account/capability schemas and error types live in `packages/contracts/src/index.ts`.
-
-## Validation and deployment
+## Checks and deployment
 
 ```powershell
-cd backend
 bun run format:check
 bun run typecheck
 bun test
-bun run db:validate
 bun run build
 ```
 
-Deploy on Render with the repository root available, since the API imports workspace contracts. Example build command from the root: `bun install --frozen-lockfile && bun run build`. Start command: `bun run --cwd backend start`. Set `HOST=0.0.0.0`, use Render's `PORT`, set production HTTPS origins and supply Clerk/Neon environment values. Apply the existing migration through a controlled deployment step. No model or GPU is needed on the backend.
+Tests use real Clerk Express middleware with locally signed JWTs and a fully replaced database module. They do not need real Clerk/Neon credentials. Run production builds from the workspace, retaining root dependencies, generated client and shared contracts. On Render set `HOST=0.0.0.0` and use its `PORT`. Root build command: `bun install --frozen-lockfile && bun run build`; start: `bun run --cwd backend start`.
 
-The response deadline bounds waiting, not underlying database execution. Database driver timeouts bound queries separately; a profile upsert can finish after a client disconnects. Socket disconnect detection is best-effort, with deadline cleanup as a fallback. The shared pool closes on shutdown.
+Desktop/browser authentication and the authenticated download/installation flow remain pending. The latest requirement is sign-in before download or installation; the protected download route enforces authentication before serving the configured private installer.
 
-Tests use real locally signed JWTs and a fake user repository. They cover account sync, invalid tokens, CORS, database errors, admission limits, deadlines, shutdown and removal of hosted STT. They do not establish real Clerk configuration, Neon connectivity or desktop authentication. No production migration or deployment was performed.
+## Authenticated installer download
+
+Set `WINDOWS_INSTALLER_PATH` to a private signed Windows installer on the server (absolute path, or relative to the backend working directory). `GET /v1/downloads/windows` requires Clerk authentication and runs the supplied middleware before accessing that file. It streams a download named `Speech-Setup.exe`, without a public static URL or cacheable response. Invalid sessions return 401; a missing/unconfigured release returns 503 `RELEASE_UNAVAILABLE`. User-supplied paths are ignored. Downloads have a separate admission pool and a five-minute connection deadline. No real installer is included in this repository.
+
+The frontend must send the Clerk session token using its supported authenticated request flow. Do not put session tokens into URLs or copyable commands. Deployment must provision the private installer file; this local-file implementation does not automatically fetch artifacts from object storage. A future private-storage adapter can replace it without changing auth middleware.
+
+Latest UX requirement: user signs in once on the website, then downloads/installs and starts using the product. No second mandatory sign-in prompt during normal installation. Automatic browser-to-installer/app session handoff is still pending. An authenticated download alone does not transfer identity into the installed app. Use a short-lived, request-bound, single-use handoff, not a reusable token embedded in a generic installer. `/v1/me` can verify resulting credentials; it is not itself a handoff exchange endpoint.
+
+Validation: 22 tests pass; auth.ts SHA-256 remains unchanged. Tests use mocked database modules and local test JWTs; no live Clerk sign-in or installer handoff has been validated.
+## One website sign-in: installation activation
+
+The backend now provides a short-lived, single-use installation activation exchange. See [Installation activation API](../docs/INSTALLATION_AUTH_API.md) for the exact start/inspect/approve/exchange contracts and client integration steps. The website reuses its existing Clerk session; the installer proves possession of a private verifier before receiving ID/email for offline activation. No browser JWT is copied into the app and no database fields are added.
+
+Use one backend instance for the bounded in-memory transaction store. Transactions expire after five minutes and are lost on restart. Website and installer integration is still pending. This supersedes earlier statements that all backend handoff endpoints are pending. The exchange enables local activation, not an authenticated Clerk session for future online API calls.

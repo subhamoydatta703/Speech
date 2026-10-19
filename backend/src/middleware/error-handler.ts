@@ -1,42 +1,28 @@
-import type { FastifyInstance } from 'fastify';
-import { z } from 'zod';
+import type { ErrorRequestHandler, RequestHandler } from 'express';
 import { ApiError, errorBody } from '../lib/errors';
+import { z } from 'zod';
 
-type HttpError = Error & { code?: string; statusCode?: number };
-
-function toPublicError(error: HttpError): ApiError {
-  if (error instanceof ApiError) return error;
-
-  if (error instanceof z.ZodError) {
-    return new ApiError(400, 'INVALID_REQUEST', 'Request fields are invalid.');
+export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (res.destroyed) return;
+  const parserError = error?.type === 'entity.parse.failed' || error?.type === 'entity.too.large';
+  const publicError =
+    error instanceof ApiError
+      ? error
+      : error instanceof z.ZodError || parserError
+        ? new ApiError(
+            error?.type === 'entity.too.large' ? 413 : 400,
+            'INVALID_REQUEST',
+            'The request body is invalid.',
+          )
+        : new ApiError(500, 'INTERNAL_ERROR', 'The request could not be completed.');
+  if (publicError.code === 'RATE_LIMITED' || publicError.code === 'BUSY') {
+    res.setHeader('Retry-After', '60');
   }
+  res.status(publicError.status).json(errorBody(publicError, res.locals.requestId));
+};
 
-  if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
-    return new ApiError(error.statusCode, 'INVALID_REQUEST', 'The request format is invalid.');
-  }
-
-  // Internal errors can contain database credentials or account details.
-  return new ApiError(500, 'INTERNAL_ERROR', 'The request could not be completed.');
-}
-
-export function registerErrorHandlers(app: FastifyInstance) {
-  app.setErrorHandler((error: HttpError, request, reply) => {
-    if (reply.sent) return;
-    const publicError = toPublicError(error);
-
-    if (publicError.code === 'RATE_LIMITED' || publicError.code === 'BUSY') {
-      reply.header('Retry-After', '60');
-    }
-
-    app.log.warn(
-      { requestId: request.id, code: publicError.code, status: publicError.status },
-      'request failed',
-    );
-    reply.code(publicError.status).send(errorBody(publicError, request.id));
-  });
-
-  app.setNotFoundHandler((request, reply) => {
-    const error = new ApiError(404, 'NOT_FOUND', 'This endpoint does not exist.');
-    return reply.code(404).send(errorBody(error, request.id));
-  });
-}
+export const notFoundHandler: RequestHandler = (_req, res) => {
+  const error = new ApiError(404, 'NOT_FOUND', 'This endpoint does not exist.');
+  res.status(404).json(errorBody(error, res.locals.requestId));
+};
