@@ -50,7 +50,7 @@ export function registerRequestLifecycle(
     const timeout = setTimeout(() => {
       const error = new ApiError(
         504,
-        'PROVIDER_TIMEOUT',
+        'REQUEST_TIMEOUT',
         'The request exceeded its time limit.',
         true,
       );

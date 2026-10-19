@@ -1,31 +1,37 @@
 import { z } from "zod";
 
-/** Metadata is validated in transit only; the server does not save it. */
-export const transcriptionFields = z
+export const userSchema = z
   .object({
-    sessionId: z.string().uuid().optional(),
+    id: z.string().startsWith("user_").max(191),
+    email: z.string().email().max(254),
   })
   .strict();
+export type User = z.infer<typeof userSchema>;
+export const currentUserSchema = z.object({ user: userSchema }).strict();
+export type CurrentUser = z.infer<typeof currentUserSchema>;
 
-export type TranscriptionResult = {
-  requestId: string;
-  sessionId?: string;
-  text: string;
-  model: string;
-  audioDurationMs: number;
-  processingDurationMs: number;
-};
+/** Describes API responsibilities, not the readiness of a user's local model. */
+export const capabilitiesSchema = z
+  .object({
+    sttMode: z.literal("local"),
+    cloudTranscription: z.literal(false),
+    storage: z
+      .object({
+        audio: z.literal(false),
+        transcripts: z.literal(false),
+        userFields: z.tuple([z.literal("id"), z.literal("email")]),
+      })
+      .strict(),
+  })
+  .strict();
+export type Capabilities = z.infer<typeof capabilitiesSchema>;
 
 export const errorCodes = [
   "AUTH_REQUIRED",
   "INVALID_REQUEST",
-  "INVALID_AUDIO",
-  "AUDIO_TOO_LARGE",
-  "NO_SPEECH",
   "RATE_LIMITED",
   "BUSY",
-  "PROVIDER_UNAVAILABLE",
-  "PROVIDER_TIMEOUT",
+  "REQUEST_TIMEOUT",
   "CANCELLED",
   "ORIGIN_NOT_ALLOWED",
   "NOT_FOUND",

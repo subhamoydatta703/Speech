@@ -11,20 +11,11 @@ function toPublicError(error: HttpError): ApiError {
     return new ApiError(400, 'INVALID_REQUEST', 'Request fields are invalid.');
   }
 
-  const uploadTooLarge = ['FST_REQ_FILE_TOO_LARGE', 'FST_ERR_CTP_BODY_TOO_LARGE'];
-  if (uploadTooLarge.includes(error.code ?? '')) {
-    return new ApiError(413, 'AUDIO_TOO_LARGE', 'The upload exceeds the configured limit.');
-  }
-
   if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
-    return new ApiError(
-      error.statusCode,
-      'INVALID_REQUEST',
-      'The request format or upload fields are invalid.',
-    );
+    return new ApiError(error.statusCode, 'INVALID_REQUEST', 'The request format is invalid.');
   }
 
-  // Database and provider errors can contain credentials or user content.
+  // Internal errors can contain database credentials or account details.
   return new ApiError(500, 'INTERNAL_ERROR', 'The request could not be completed.');
 }
 

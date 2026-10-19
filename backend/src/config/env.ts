@@ -29,17 +29,9 @@ const schema = z.object({
     .refine((value) => new URL(value).protocol === 'https:'),
   CLERK_AUTHORIZED_PARTIES: z.string().min(1),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
-  HF_TOKEN: z.string().min(1),
-  HF_MODEL: z
-    .string()
-    .regex(/^[\w.-]+\/[\w.-]+$/)
-    .default('openai/whisper-large-v3'),
-  MAX_AUDIO_SECONDS: integer(60, 1, 60),
-  MAX_UPLOAD_BYTES: integer(5 * 1024 * 1024, 32044, 5 * 1024 * 1024),
   MAX_CONCURRENT_REQUESTS: integer(4, 1, 32),
   REQUESTS_PER_MINUTE: integer(60, 1, 10000),
-  PROVIDER_TIMEOUT_MS: integer(45000, 100, 120000),
-  REQUEST_TIMEOUT_MS: integer(90000, 1000, 180000),
+  REQUEST_TIMEOUT_MS: integer(10000, 1000, 180000),
 });
 
 export type Config = z.infer<typeof schema> & {
@@ -61,9 +53,6 @@ export function readConfig(env: Record<string, string | undefined> = process.env
       }
       return origin;
     });
-  if (value.REQUEST_TIMEOUT_MS <= value.PROVIDER_TIMEOUT_MS) {
-    throw new Error('REQUEST_TIMEOUT_MS must exceed PROVIDER_TIMEOUT_MS');
-  }
   return {
     ...value,
     origins: parseOrigins(value.CORS_ORIGINS),
